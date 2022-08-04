@@ -11,9 +11,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         url: process.env.DATABASE_URL,
         entities: ['dist/**/*entity.js'],
         // autoLoadEntities:true,
-        // ssl: {
-        //   rejectUnauthorized: false,
-        // },
+        ssl: {
+          rejectUnauthorized: false,
+        },
         synchronize: true,
       }
     ),
