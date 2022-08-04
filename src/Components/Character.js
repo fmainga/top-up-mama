@@ -3,8 +3,6 @@ import React from 'react'
 const Character = ({character, charactersCount, bookId}) => {
     return (
         <div className="character">
-            <p>BookID: <b>{bookId}</b> </p>
-            <p>CharactersCount: <b>{charactersCount}</b></p>
             <hr></hr>
             <p>Name: <b>{character.character_name}</b></p>
             <p> Gender: <b>{character.character_gender}</b></p>

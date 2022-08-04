@@ -54,7 +54,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ comment: task.text })
     }
-    const result = await fetch(`https://top-up-mama-app.herokuapp.com/api/comment/${task.bookId}`,requestOptions)
+    const result = await fetch(`https://top-up-mama-app.herokuapp.com/api/comment/${task.bookId}`, requestOptions)
     const resultData = await result.json()
     console.log('Result Data', resultData)
   }
