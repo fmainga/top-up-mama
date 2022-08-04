@@ -7,7 +7,8 @@ import { Books } from 'src/database/models/book.entity';
 import { Characters } from 'src/database/models/character.entity';
 import { Comments } from 'src/database/models/comment.entity';
 import { json } from 'stream/consumers';
-import { Repository } from 'typeorm';
+import { QueryBuilder, Repository } from 'typeorm';
+import { CharactersQueryParams } from './dtos/characters-query-params.dto';
 
 @Injectable()
 export class BooksService {
@@ -78,7 +79,7 @@ export class BooksService {
 
     }
   }
-  async fetchBookCharacterList(bookID) {
+  async fetchBookCharacterList(params:CharactersQueryParams, bookID) {
     const url = `${process.env.RESOURCES_URL}/books/${bookID}`
     try {
       const bookData = await lastValueFrom(
@@ -92,7 +93,35 @@ export class BooksService {
       )
       console.log("Book Characters Count: ", bookData.characters.length)
       const charactersLength = bookData.characters.length
-      const bookCharacters = await this.books.findOne({
+      console.log(params)
+      // Query
+      let bookCharacters
+      if(
+       ( params.order!=undefined && params.order!='')&& 
+        (params.sort!=undefined && params.sort!='')
+      ){
+        const sort = params.order == 'asc'?"ASC":"DESC"
+        bookCharacters = await this.books.createQueryBuilder('books')
+        .leftJoinAndSelect('books.characters', 'characters')
+        .orderBy(`characters.${params.sort}`, `${sort}`)
+        .where('books.book_id = :book_id',{book_id:bookID})
+        .getMany()
+        console.log('Fetching Sorted List')
+        console.log("Sorted LIST", bookCharacters)
+        return bookCharacters
+      }
+      if((params.gender!=undefined && params.gender!='')&&(params.gender == "male"|| params.gender=="female")){
+        const gender = params.gender == "female"?"Female":"Male"
+        bookCharacters = await this.books.createQueryBuilder('books')
+        .leftJoinAndSelect('books.characters', 'characters')
+        .where('books.book_id = :book_id',{book_id:bookID})
+        .andWhere('characters.character_gender = :character_gender', {character_gender:gender})
+        .getMany()
+        console.log('Fetching Sorted List')
+        console.log("Gender filtered LIST", bookCharacters)
+        return bookCharacters
+      }
+      bookCharacters = await this.books.findOne({
         where: {
           book_id: bookID,
         },
@@ -151,12 +180,6 @@ export class BooksService {
     }
   }
   async fetchBooksComments(bookID: number) {
-    // const comments = await this.books.createQueryBuilder('books')
-    // .leftJoinAndSelect("books.comments", "comments")
-    //   .where("book.book_id = :book_id", {
-    //     book_id: bookID
-    //   })
-    //   .getOne()
     const comments = await this.books.findOne({
       where: {
         book_id: bookID,
