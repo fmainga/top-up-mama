@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Param, Post, Query, Request } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Request } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BooksService } from './books.service';
 import { CharactersQueryParams } from './dtos/characters-query-params.dto';
@@ -30,6 +30,7 @@ export class BooksController {
   }
   @ApiOkResponse({type: Comments})
   @Post('comment/:bookID')
+  @HttpCode(200)
   @ApiOperation({ summary: "Add a comment to a book",})
   comment(@Param ('bookID') bookID: number, @Body() comment: Comment, @Request() req: any){
     return this.booksService.comment({bookID, req, comment})
