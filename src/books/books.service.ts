@@ -69,8 +69,8 @@ export class BooksService {
         .orderBy("books.release_date", "ASC")
         .getMany()
       console.log(collection)
-      return{
-        status:200,
+      return {
+        status: 200,
         message: 'success',
         books: collection
       }
@@ -83,7 +83,7 @@ export class BooksService {
 
     }
   }
-  async fetchBookCharacterList(params:CharactersQueryParams, bookID) {
+  async fetchBookCharacterList(params: CharactersQueryParams, bookID) {
     const url = `${process.env.RESOURCES_URL}/books/${bookID}`
     try {
       const bookData = await lastValueFrom(
@@ -100,40 +100,64 @@ export class BooksService {
       console.log(params)
       // Query
       let bookCharacters
-      if(
-       ( params.order!=undefined && params.order!='')&& 
-        (params.sort!=undefined && params.sort!='')
-      ){
-        const sort = params.order == 'asc'?"ASC":"DESC"
+      if (
+        (params.order != undefined && params.order != '') &&
+        (params.sort != undefined && params.sort != '')
+      ) {
+        const sort = params.order == 'asc' ? "ASC" : "DESC"
         bookCharacters = await this.books.createQueryBuilder('books')
-        .leftJoinAndSelect('books.characters', 'characters')
-        .orderBy(`characters.${params.sort}`, `${sort}`)
-        .where('books.book_id = :book_id',{book_id:bookID})
-        .getMany()
+          .leftJoinAndSelect('books.characters', 'characters')
+          .orderBy(`characters.${params.sort}`, `${sort}`)
+          .where('books.book_id = :book_id', { book_id: bookID })
+          .getMany()
         console.log('Fetching Sorted List')
         console.log("Sorted LIST", bookCharacters)
         const charactersCount = bookCharacters[0].characters.length
+        const filteredLst = bookCharacters[0].characters
+        let tage = 0;
+        filteredLst.forEach((list) => {
+          tage += parseInt(list.age)
+        });
+        console.log("Total Age: ", tage)
         return {
           status: 200,
           message: 'success',
           charactersCount: charactersCount,
+          totalAge: tage,
           ...bookCharacters[0]
         }
       }
-      if((params.gender!=undefined && params.gender!='')&&(params.gender == "male"|| params.gender=="female")){
-        const gender = params.gender == "female"?"Female":"Male"
+      if ((params.gender != undefined && params.gender != '') && (params.gender == "male" || params.gender == "female")) {
+        const gender = params.gender == "female" ? "Female" : "Male"
         bookCharacters = await this.books.createQueryBuilder('books')
-        .leftJoinAndSelect('books.characters', 'characters')
-        .where('books.book_id = :book_id',{book_id:bookID})
-        .andWhere('characters.character_gender = :character_gender', {character_gender:gender})
-        .getMany()
+          .leftJoinAndSelect('books.characters', 'characters')
+          .where('books.book_id = :book_id', { book_id: bookID })
+          .andWhere('characters.character_gender = :character_gender', { character_gender: gender })
+          .getMany()
         console.log('Fetching Sorted List')
         console.log("Gender filtered LIST", bookCharacters)
+        if (bookCharacters.length < 1) {
+          return {
+            status: 200,
+            message: 'success',
+            charactersCount: 0
+          }
+
+        }
         const charactersCount = bookCharacters[0].characters.length
+        const filteredList = bookCharacters[0].characters
+
+        let totalAge = 0;
+        filteredList.forEach((list) => {
+          totalAge += parseInt(list.age)
+        });
+        console.log("Total Age: ", totalAge)
+
         return {
           status: 200,
           message: 'success',
           charactersCount,
+          totalAge,
           ...bookCharacters[0]
         }
       }
@@ -143,26 +167,31 @@ export class BooksService {
         },
         relations: ["characters",]
       })
-      if(bookCharacters.characters.length>1){
+      if (bookCharacters.characters.length > 1) {
+        let sumOAge = 0
+        bookCharacters.characters.forEach((element) => {
+          sumOAge+= parseInt(element.age)
+        });
         return {
           bookId: bookCharacters.book_id,
           charactersCount: bookCharacters.characters.length,
+          totalAge: sumOAge,
           characters: bookCharacters.characters
         }
       } else {
-        for(let i =0 ;i<charactersLength;i++){
+        for (let i = 0; i < charactersLength; i++) {
           const uri = bookData.characters[i]
           const characterInfo = await lastValueFrom(
-            this.httpService.get(uri).pipe(map((result)=>result.data))
+            this.httpService.get(uri).pipe(map((result) => result.data))
           )
-          if ((characterInfo.name!= "" && characterInfo.gender!= "")&&(characterInfo.born!= "" && characterInfo.died!= "")){
+          if ((characterInfo.name != "" && characterInfo.gender != "") && (characterInfo.born != "" && characterInfo.died != "")) {
             const characterData = {
               book: bookID,
               name: characterInfo.name,
               gender: characterInfo.gender,
               born: characterInfo.born,
               died: characterInfo.died,
-              age: ((characterInfo.died).match(/^\d+|\d+\b|\d+(?=\w)/g))[0]- ((characterInfo.born).match(/^\d+|\d+\b|\d+(?=\w)/g))[0]
+              age: ((characterInfo.died).match(/^\d+|\d+\b|\d+(?=\w)/g))[0] - ((characterInfo.born).match(/^\d+|\d+\b|\d+(?=\w)/g))[0]
             }
             const characterModel = this.characters.create({
               character_name: characterData.name,
@@ -170,20 +199,37 @@ export class BooksService {
               age: characterData.age,
               character_dob: characterData.born,
               character_dod: characterData.died,
-              book:characterData.book
+              book: characterData.book
             })
-            await this.characters.upsert(characterModel,{
+            await this.characters.upsert(characterModel, {
               skipUpdateIfNoValuesChanged: true,
               conflictPaths: ['character_name']
             })
           }
         }
-        return await this.books.findOne({
+        const books = await this.books.findOne({
           where: {
             book_id: bookID,
           },
           relations: ["characters"]
         })
+      
+        const filteredList = bookCharacters[0].characters
+
+        let totalAge = 0;
+        filteredList.forEach((list) => {
+          totalAge += parseInt(list.age)
+        });
+        console.log("Total Age: ", totalAge)
+
+        return {
+          status: 200,
+          message: 'success',
+          charactersCount: filteredList.length,
+          totalAge,
+          ...books[0]
+        }
+
 
       }
 
@@ -227,8 +273,8 @@ export class BooksService {
         message: "Could not add comment to the book",
         error: error.message
       }
-      
-      
+
+
     }
   }
 }

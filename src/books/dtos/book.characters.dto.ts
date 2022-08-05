@@ -14,5 +14,7 @@ export class BookCharacters {
   @ApiProperty()
   charactersCount: number;
   @ApiProperty()
+  totalAge: number;
+  @ApiProperty()
   characters: [JSON];
 }
