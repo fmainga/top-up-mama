@@ -24,8 +24,19 @@ Preference: Postgres
 
 
 ## Testing the Application
+### Path params
+1. bookId (number)
+### Sort Parameters
+1. character_name
+2. age
+3. character_gender
 
-Refere to the swagger docs
+### Filter Parameters
+1. character_gender (male or female)
+
+Refer to the swagger docs
+
+
 
 ## Improvements
 1. Pagination
