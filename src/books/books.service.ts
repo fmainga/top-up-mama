@@ -72,7 +72,7 @@ export class BooksService {
       return{
         status:200,
         message: 'success',
-        ...collection
+        books: collection
       }
     } catch (error) {
       console.error("Something Happened fetching Books: ", error)
