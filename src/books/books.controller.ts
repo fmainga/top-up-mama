@@ -24,14 +24,16 @@ export class BooksController {
 
   @ApiNotFoundResponse({type: CharactersNotFound})
   @ApiOkResponse({type: BookCharacters})
-  @Get('book-characters/:bookID')
+  @Get('book/:bookID/characters')
   @HttpCode(200)
   @ApiOperation({summary: "Fetch a books characters list"})
   fetchBooksCharacterList(@Query() params: CharactersQueryParams, @Param ('bookID') bookID: number){
     return this.booksService.fetchBookCharacterList(params, bookID)
   }
 
-  @Get('comments/:bookID')
+  @ApiNotFoundResponse({type: CharactersNotFound})
+  @ApiOkResponse({type: Comments})
+  @Get('book/:bookID/comments')
   @HttpCode(200)
   @ApiNotFoundResponse({schema:{
     title: "Resources not found",
@@ -41,7 +43,7 @@ export class BooksController {
      return this.booksService.fetchBooksComments(bookID)
   }
   @ApiOkResponse({type: Comments})
-  @Post('comment/:bookID')
+  @Post('book/:bookID/comment')
   @HttpCode(200)
   @ApiOperation({ summary: "Add a comment to a book",})
   comment(@Param ('bookID') bookID: number, @Body() comment: Comment, @Request() req: any){

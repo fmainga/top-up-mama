@@ -2,11 +2,22 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class Comments {
   @ApiProperty()
-  status: number
+  book_id: string;
   @ApiProperty()
-  message: string
+  book_name: string;
   @ApiProperty()
-  book_id: number;
+  release_date: Date;
   @ApiProperty()
-  comment: string
+  authors: [];
+  @ApiProperty()
+  comments: [];
 }
+
+// "id": "1",
+// "book_id": "1",
+// "book_name": "A Game of Thrones",
+// "release_date": "1996-08-01",
+// "authors": [
+//   "George R. R. Martin"
+// ],
+// "created_at": "2022-08-05T04:39:17.201Z",

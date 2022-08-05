@@ -1,10 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OpenAPIObject } from '@nestjs/swagger';
+import { ObjectType } from 'typeorm';
 
 export class Books {
   @ApiProperty()
-  status: number;
   @ApiProperty()
   message: string;
   @ApiProperty()
-  book_title: string;
+  books: Array<OpenAPIObject>
+
 }
