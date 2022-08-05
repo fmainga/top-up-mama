@@ -24,7 +24,11 @@ function App() {
   const fetchBooks = async () => {
     const data = await fetch('https://top-up-mama-app.herokuapp.com/api/books')
     const bk = await data.json()
-    return bk
+    console.log(bk)
+    console.log("Status", bk.status)
+    console.log("Books:", bk.books)
+    console.log(bk.books)
+    return bk.books
   }
 
   const fetchCharacters = async (id) => {

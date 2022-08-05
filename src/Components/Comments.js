@@ -15,7 +15,7 @@ const Comments = ({addComment, bookId, comments, commentId}) => {
         setText('')
     }
   return (
-    <>
+    <div className='book'>
     {comments.map((comment)=>(<Comment key={comment.comment_id} comment = {comment} commentId={commentId}/>))}
     <form className='add-form' onSubmit={onSubmit}>
                 <div className='form-control'>
@@ -27,7 +27,7 @@ const Comments = ({addComment, bookId, comments, commentId}) => {
                 <input type='submit' value='Add Comment' className='btn btn-block' />
 
             </form>
-    </>
+    </div>
   )
 }
 
