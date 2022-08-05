@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { lastValueFrom, map } from 'rxjs';
 import { Books } from 'src/database/models/book.entity';
@@ -69,7 +69,11 @@ export class BooksService {
         .orderBy("books.release_date", "ASC")
         .getMany()
       console.log(collection)
-      return collection
+      return{
+        status:200,
+        message: 'success',
+        ...collection
+      }
     } catch (error) {
       console.error("Something Happened fetching Books: ", error)
       return {
@@ -108,7 +112,13 @@ export class BooksService {
         .getMany()
         console.log('Fetching Sorted List')
         console.log("Sorted LIST", bookCharacters)
-        return bookCharacters
+        const charactersCount = bookCharacters[0].characters.length
+        return {
+          status: 200,
+          message: 'success',
+          charactersCount: charactersCount,
+          ...bookCharacters[0]
+        }
       }
       if((params.gender!=undefined && params.gender!='')&&(params.gender == "male"|| params.gender=="female")){
         const gender = params.gender == "female"?"Female":"Male"
@@ -119,7 +129,13 @@ export class BooksService {
         .getMany()
         console.log('Fetching Sorted List')
         console.log("Gender filtered LIST", bookCharacters)
-        return bookCharacters
+        const charactersCount = bookCharacters[0].characters.length
+        return {
+          status: 200,
+          message: 'success',
+          charactersCount,
+          ...bookCharacters[0]
+        }
       }
       bookCharacters = await this.books.findOne({
         where: {
@@ -146,10 +162,12 @@ export class BooksService {
               gender: characterInfo.gender,
               born: characterInfo.born,
               died: characterInfo.died,
+              age: ((characterInfo.died).match(/^\d+|\d+\b|\d+(?=\w)/g))[0]- ((characterInfo.born).match(/^\d+|\d+\b|\d+(?=\w)/g))[0]
             }
             const characterModel = this.characters.create({
               character_name: characterData.name,
               character_gender: characterData.gender,
+              age: characterData.age,
               character_dob: characterData.born,
               character_dod: characterData.died,
               book:characterData.book
@@ -190,15 +208,27 @@ export class BooksService {
     return comments
   }
   async comment({ bookID, req, comment }) {
-    const commentData = {
-      author_ip: req.ip,
-      comment: comment.comment,
-      book: bookID
-    }
-    await this.coments.save(commentData)
-    return {
-      bookID,
-      comment: comment.comment
+    try {
+      const commentData = {
+        author_ip: req.ip,
+        comment: comment.comment,
+        book: bookID
+      }
+      await this.coments.save(commentData)
+      return {
+        status: 200,
+        message: 'success',
+        bookID,
+        comment: comment.comment
+      }
+    } catch (error) {
+      return {
+        status: 400,
+        message: "Could not add comment to the book",
+        error: error.message
+      }
+      
+      
     }
   }
 }

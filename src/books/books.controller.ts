@@ -1,7 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Request } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiConflictResponse, ApiNotAcceptableResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BooksService } from './books.service';
+import { BookNotFound } from './dtos/book-not-found.dto';
+import { BookCharacters } from './dtos/book.characters.dto';
+import { Books } from './dtos/books.dto';
+import { CharactersNotFound } from './dtos/characters-not-found.dto';
 import { CharactersQueryParams } from './dtos/characters-query-params.dto';
 import { Comment } from './dtos/comment.dto';
 import { Comments } from './dtos/comments.dto';
@@ -9,18 +13,26 @@ import { Comments } from './dtos/comments.dto';
 @Controller("api")
 export class BooksController {
   constructor(private booksService: BooksService) {}
+  @ApiNotFoundResponse({type: BookNotFound})
+  @ApiOkResponse({type: Books})
   @Get('books')
+  @HttpCode(200)
   @ApiOperation({summary:"Fetching Books from API and Syncing with the database"})
-  @ApiResponse({ status: 201, description: 'Resources Found' })
   fetchAllBooks(){
     return this.booksService.fetchAllBooks()
   }
+
+  @ApiNotFoundResponse({type: CharactersNotFound})
+  @ApiOkResponse({type: BookCharacters})
   @Get('book-characters/:bookID')
+  @HttpCode(200)
   @ApiOperation({summary: "Fetch a books characters list"})
   fetchBooksCharacterList(@Query() params: CharactersQueryParams, @Param ('bookID') bookID: number){
     return this.booksService.fetchBookCharacterList(params, bookID)
   }
+
   @Get('comments/:bookID')
+  @HttpCode(200)
   @ApiNotFoundResponse({schema:{
     title: "Resources not found",
   }})

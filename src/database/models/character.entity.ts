@@ -17,6 +17,8 @@ export class Characters {
   character_name: string;
   @Column({type:'varchar', name:'character_gender'})
   character_gender: string;
+  @Column({type:'bigint', name:'age', nullable: true})
+  age:number
   @Column({type:'varchar', name:'character_dob'})
   character_dob: string;
   @Column({type:'varchar', name:'character_dod'})
