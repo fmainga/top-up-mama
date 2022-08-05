@@ -33,7 +33,7 @@ function App() {
 
   const fetchCharacters = async (id) => {
     toggleCharacters()
-    const res = await fetch(`https://top-up-mama-app.herokuapp.com/api/book-characters/${id}`)
+    const res = await fetch(`https://top-up-mama-app.herokuapp.com/api/book/${id}/characters`)
     const data = await res.json()
     console.log('Fetching Characters for:', id)
     console.log('Characters Info: ', data)
@@ -43,7 +43,7 @@ function App() {
   }
   const fetchComments = async (id) => {
     toggleComments()
-    const res = await fetch(`https://top-up-mama-app.herokuapp.com/api/comments/${id}`)
+    const res = await fetch(`https://top-up-mama-app.herokuapp.com/api/book/${id}/comments`)
     const data = await res.json()
     console.log('Fetching Comments for:', id)
     console.log('Comments Info: ', data)
@@ -58,7 +58,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ comment: task.text })
     }
-    const result = await fetch(`https://top-up-mama-app.herokuapp.com/api/comment/${task.bookId}`, requestOptions)
+    const result = await fetch(`https://top-up-mama-app.herokuapp.com/api/book/${task.bookId}/comment`, requestOptions)
     const resultData = await result.json()
     console.log('Result Data', resultData)
   }
